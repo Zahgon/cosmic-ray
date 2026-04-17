@@ -50,7 +50,7 @@ class WorkResult:
     @property
     def is_killed(self):
         "Whether the mutation should be considered 'killed'"
-        return self.test_outcome != TestOutcome.SURVIVED
+        pass
 
 
 @define(frozen=True)
@@ -67,11 +67,7 @@ class MutationSpec:
 
     @end_pos.validator
     def _validate_positions(self, attribute, value):
-        start_line, start_col = self.start_pos
-        end_line, end_col = value
-
-        if start_line > end_line or (start_line == end_line and start_col >= end_col):
-            raise ValueError("End position must come after start position.")
+        pass
 
 
 @define(frozen=True)

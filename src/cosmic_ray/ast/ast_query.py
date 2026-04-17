@@ -36,40 +36,16 @@ class ASTQuery:
 
     def _clone(self, obj) -> "ASTQuery":
         "Clone this query."
-        return type(self)(obj)
+        pass
 
     def match(self, cls=None, **kwargs) -> "ASTQuery":
         "Check if node matches a class."
-        obj = self.obj
-        if obj is None:
-            return self
-
-        if cls is None or isinstance(obj, cls):
-            for k, v in kwargs.items():
-                op = None
-                k__op = k.split("__")
-                if len(k__op) == 2:
-                    k, op = k__op
-                node_value = getattr(obj, k)
-                if op is None:
-                    if node_value != v:
-                        break
-                elif op == "in":
-                    if node_value not in v:
-                        break
-                else:
-                    raise ValueError(f"Can't handle operator {op}")
-            else:
-                # All is true, continue recursion
-                return self
-
-        # A test fails
-        return self._clone(None)
+        pass
 
     @property
     def ok(self):
         "Is the query ok."
-        return bool(self.obj)
+        pass
 
     def __bool__(self):
         return self.ok
@@ -83,7 +59,7 @@ class ASTQuery:
     @property
     def IF(self):
         "Conditional navigation."
-        return ASTQueryOptional(self.obj, obj_test=self)
+        pass
 
     def __call__(self, *args, **kwargs) -> "ASTQuery":
         if self.obj is None:
@@ -116,14 +92,9 @@ class ASTQueryOptional(ASTQuery):
         self._initial = obj_test
 
     def _clone(self, obj):
-        o = super()._clone(obj)
-        o._initial = self._initial  # pylint: disable=protected-access
-
-        return o
+        pass
 
     @property
     def FI(self):
         "End of conditional navigation."
-        if self:
-            return self._initial._clone(self.obj)  # pylint: disable=protected-access
-        return self._initial
+        pass

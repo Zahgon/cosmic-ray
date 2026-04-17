@@ -200,7 +200,7 @@ class MutationVisitor(Visitor):
     @property
     def mutation_applied(self):
         "Whether this visitor has applied a mutation."
-        return self._mutation_applied
+        pass
 
     def visit(self, node):
         for index, _ in enumerate(self.operator.mutation_positions(node)):

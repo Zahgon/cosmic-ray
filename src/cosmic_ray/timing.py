@@ -25,7 +25,7 @@ class Timer:
 
     def reset(self):
         """Set the elapsed time back to 0."""
-        self._start = datetime.datetime.now()
+        pass
 
     @property
     def elapsed(self):
@@ -33,7 +33,7 @@ class Timer:
 
         Returns a `datetime.timedelta` object.
         """
-        return datetime.datetime.now() - self._start
+        pass
 
     def __enter__(self):
         self.reset()

@@ -70,23 +70,22 @@ class ConfigDict(dict):
     @property
     def test_command(self):
         """The command to run to execute tests."""
-        return self["test-command"]
+        pass
 
     @property
     def timeout(self):
         "The timeout (seconds) for tests."
-        return float(self["timeout"])
+        pass
 
     @property
     def distributor_name(self):
         "The name of the distributor to use."
-        return self["distributor"]["name"]
+        pass
 
     @property
     def distributor_config(self):
         "The configuration for the named distributor."
-        name = self.distributor_name
-        return self["distributor"].get(name, ConfigDict())
+        pass
 
     @property
     def operators_config(self):
@@ -97,7 +96,7 @@ class ConfigDict(dict):
         of the operator, and each parameterized operator will be executed once for each
         parameterization.
         """
-        return self.get("operators", {})
+        pass
 
 
 @contextmanager

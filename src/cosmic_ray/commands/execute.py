@@ -22,9 +22,7 @@ def _update_progress(work_db):
 
 
 def _report_progress(stream):
-    for db_name, progress_message in _progress_messages.items():
-        session = os.path.splitext(db_name)[0]
-        print(f"{session} : {progress_message}", file=stream)
+    pass
 
 
 @reports_progress(_report_progress)
@@ -39,9 +37,7 @@ def execute(work_db, config: ConfigDict):
     distributor = get_distributor(config.distributor_name)
 
     def on_task_complete(job_id, work_result):
-        work_db.set_result(job_id, work_result)
-        _update_progress(work_db)
-        log.info("Job %s complete", job_id)
+        pass
 
     log.info("Beginning execution")
     distributor(

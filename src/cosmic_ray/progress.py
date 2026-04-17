@@ -92,11 +92,7 @@ def reports_progress(reporter):
 
     def decorator(func):  # pylint: disable=missing-docstring
         @wraps(func)
-        def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
-            with progress_reporter(reporter):
-                return func(*args, **kwargs)
-
-        return wrapper
+        pass
 
     return decorator
 

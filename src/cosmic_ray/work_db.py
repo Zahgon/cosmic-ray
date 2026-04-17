@@ -46,7 +46,7 @@ class WorkDB:
         self._engine = create_engine(f"sqlite:///{path}")
 
         def enable_foreign_keys(dbapi_con, _con_rec):
-            dbapi_con.execute("pragma foreign_keys=ON")
+            pass
 
         event.listen(self._engine, "connect", enable_foreign_keys)
         Base.metadata.create_all(self._engine)
@@ -62,7 +62,7 @@ class WorkDB:
 
         Derived from the constructor arguments.
         """
-        return str(self._path)
+        pass
 
     @property
     def work_items(self):
@@ -70,14 +70,12 @@ class WorkDB:
 
         This includes both WorkItems with and without results.
         """
-        with self._session_maker.begin() as session:
-            return tuple(_work_item_from_storage(work_item) for work_item in session.query(WorkItemStorage).all())
+        pass
 
     @property
     def num_work_items(self):
         """The number of work items."""
-        with self._session_maker.begin() as session:
-            return session.query(WorkItemStorage).count()
+        pass
 
     def add_work_item(self, work_item):
         """Add a :class:`WorkItem`.
@@ -85,7 +83,7 @@ class WorkDB:
         Args:
           work_item: A ``WorkItem``.
         """
-        self.add_work_items((work_item,))
+        pass
 
     def add_work_items(self, work_items):
         """Add multiple WorkItems.
@@ -110,15 +108,12 @@ class WorkDB:
     @property
     def results(self):
         "An iterable of all ``(job-id, WorkResult)``\\s."
-        with self._session_maker.begin() as session:
-            for result in session.query(WorkResultStorage).all():
-                yield result.job_id, _work_result_from_storage(result)
+        pass
 
     @property
     def num_results(self):
         """The number of results."""
-        with self._session_maker.begin() as session:
-            return session.query(WorkResultStorage).count()
+        pass
 
     def set_result(self, job_id, result):
         """Set the result for a job.
@@ -151,36 +146,17 @@ class WorkDB:
         Raises:
            KeyError: If there is no work-item with a matching job-id.
         """
-        try:
-            with self._session_maker.begin() as session:
-                for job_id in job_ids:
-                    storage = _work_result_to_storage(result, job_id)
-                    session.merge(storage)
-        except IntegrityError:
-            raise KeyError(f"Unable to add results for job-id {job_id}. No matching WorkItem.")
+        pass
 
     @property
     def pending_work_items(self):
         "Iterable of all pending work items. In random order."
-        with self._session_maker.begin() as session:
-            completed_job_ids = session.query(WorkResultStorage.job_id)
-            pending = (
-                session.query(WorkItemStorage)
-                .where(~WorkItemStorage.job_id.in_(completed_job_ids))
-                .order_by(func.random())
-            )
-            return tuple(_work_item_from_storage(work_item) for work_item in pending)
+        pass
 
     @property
     def completed_work_items(self):
         "Iterable of ``(work-item, result)``\\s for all completed items."
-        with self._session_maker.begin() as session:
-            results = session.query(WorkItemStorage, WorkResultStorage).where(
-                WorkItemStorage.job_id == WorkResultStorage.job_id
-            )
-            return tuple(
-                (_work_item_from_storage(work_item), _work_result_from_storage(result)) for work_item, result in results
-            )
+        pass
 
 
 @contextlib.contextmanager
@@ -247,15 +223,7 @@ class WorkResultStorage(Base):
 
 
 def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
-    return MutationSpec(
-        module_path=Path(mutation_spec.module_path),
-        operator_name=mutation_spec.operator_name,
-        operator_args=json.loads(mutation_spec.operator_args),
-        occurrence=mutation_spec.occurrence,
-        start_pos=(mutation_spec.start_pos_row, mutation_spec.start_pos_col),
-        end_pos=(mutation_spec.end_pos_row, mutation_spec.end_pos_col),
-        definition_name=mutation_spec.definition_name,
-    )
+    pass
 
 
 def _mutation_spec_to_storage(mutation_spec: MutationSpec, job_id: str):
@@ -274,10 +242,7 @@ def _mutation_spec_to_storage(mutation_spec: MutationSpec, job_id: str):
 
 
 def _work_item_from_storage(work_item: WorkItemStorage):
-    return WorkItem(
-        mutations=tuple(_mutation_spec_from_storage(s) for s in work_item.mutations),
-        job_id=work_item.job_id,
-    )
+    pass
 
 
 def _work_item_to_storage(work_item: WorkItem):
@@ -298,9 +263,4 @@ def _work_result_to_storage(result: WorkResult, job_id):
 
 
 def _work_result_from_storage(result: WorkResultStorage):
-    return WorkResult(
-        worker_outcome=result.worker_outcome,
-        output=result.output,
-        test_outcome=result.test_outcome,
-        diff=result.diff,
-    )
+    pass

@@ -119,11 +119,7 @@ def handle_exec(config_file, session_file):
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
-    cfg = load_config(config_file)
-
-    with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
-        cosmic_ray.commands.execute(work_db, cfg)
-    sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()
@@ -141,39 +137,7 @@ def baseline(config_file, session_file):
 
     Exits with 0 if the job has exited normally, otherwise 1.
     """
-    cfg = load_config(config_file)
-
-    @contextmanager
-    def path_or_temp(path):
-        if path is None:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                yield Path(tmpdir) / "session.sqlite"
-        else:
-            yield path
-
-    with path_or_temp(session_file) as session_path:
-        with use_db(session_path, mode=WorkDB.Mode.create) as db:
-            db.clear()
-            db.add_work_item(
-                WorkItem(
-                    mutations=[],
-                    job_id="baseline",
-                )
-            )
-
-            # Run the single-entry session.
-            cosmic_ray.commands.execute(db, cfg)
-
-            result = next(db.results)[1]
-            if result.test_outcome == TestOutcome.KILLED:
-                message = ["Baseline failed. Execution with no mutation gives those following errors:"]
-                for line in result.output.split("\n"):
-                    message.append(f"  >>> {line}")
-                log.error("\n".join(message))
-                sys.exit(1)
-            else:
-                log.info("Baseline passed. Execution with no mutation works fine.")
-                sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()
@@ -186,26 +150,7 @@ def dump(session_file):
     WorkResult, both JSON-serialized. The WorkResult can be null, indicating a
     WorkItem with no results.
     """
-
-    def item_to_dict(work_item):
-        d = asdict(work_item)
-        for m in d["mutations"]:
-            m["module_path"] = str(m["module_path"])
-        return d
-
-    def result_to_dict(result):
-        d = asdict(result)
-        d["worker_outcome"] = d["worker_outcome"].value
-        d["test_outcome"] = d["test_outcome"].value
-        return d
-
-    with use_db(session_file, WorkDB.Mode.open) as database:
-        for work_item, result in database.completed_work_items:
-            print(json.dumps((item_to_dict(work_item), result_to_dict(result))))
-        for work_item in database.pending_work_items:
-            print(json.dumps((item_to_dict(work_item), None)))
-
-    sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()
@@ -219,9 +164,7 @@ def operators():
 @cli.command()
 def distributors():
     """List the available distributor plugins."""
-    print("\n".join(cosmic_ray.plugins.distributor_names()))
-
-    sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()
@@ -230,10 +173,7 @@ def distributors():
 @click.argument("occurrence", type=int)
 def apply(module_path, operator, occurrence):
     """Apply the specified mutation to the files on disk. This is primarily a debugging tool."""
-
-    apply_mutation(Path(module_path), cosmic_ray.plugins.get_operator(operator)(), occurrence)
-
-    sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()
@@ -241,17 +181,7 @@ def apply(module_path, operator, occurrence):
 @click.option("--path", default=None, help="Path to Unix domain socket on which to listen for requests")
 def http_worker(port, path):
     """Run an HTTP worker for the 'http' distributor."""
-    if (port is None) == (path is None):
-        log.error("You must specify exactly one of --path or --port")
-        sys.exit(ExitCode.USAGE)
-
-    try:
-        cosmic_ray.distribution.http.run_worker(port=port, path=path)
-    except ValueError as exc:
-        log.error(str(exc))
-        sys.exit(ExitCode.DATA_ERR)
-
-    sys.exit(ExitCode.OK)
+    pass
 
 
 @cli.command()

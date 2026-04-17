@@ -47,50 +47,7 @@ class HttpDistributor(Distributor):
         asyncio.get_event_loop().run_until_complete(self._process(*args, **kwargs))
 
     async def _process(self, pending_work, test_command, timeout, config, on_task_complete):
-        urls = config.get("worker-urls", [])
-
-        if not urls:
-            raise ValueError("No worker URLs provided for HttpDistributor")
-
-        fetchers = {}
-
-        async def handle_completed_task(task):
-            # TODO: If one of the URLs we've got is bad (i.e. no worker is running on it), that will result in an
-            # exception from one of the tasks. We should notice this, log it, and remove the offending URL from the
-            # pool.
-
-            url, completed_job_id = fetchers[task]
-            try:
-                result = await task
-            except Exception as exc:
-                # TODO: Do something with the exception
-                log.exception("Error fetching result")
-                result = WorkResult(worker_outcome=WorkerOutcome.ABNORMAL, output=str(exc))
-            finally:
-                del fetchers[task]
-                urls.append(url)
-                on_task_complete(completed_job_id, result)
-
-        for work_item in pending_work:
-            # Wait for an available URL
-            while not urls:
-                assert fetchers.keys()
-                done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.FIRST_COMPLETED)
-                for task in done:
-                    await handle_completed_task(task)
-
-            assert urls, "URL should always be available"
-
-            # Use an available URL to process the task
-            url = urls.pop()
-            fetcher = asyncio.create_task(send_request(url, work_item, test_command, timeout))
-            fetchers[fetcher] = url, work_item.job_id
-
-        # Drain the remaining work
-        if fetchers.keys():
-            done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.ALL_COMPLETED)
-            for task in done:
-                await handle_completed_task(task)
+        pass
 
 
 async def send_request(url, work_item: WorkItem, test_command, timeout):
@@ -104,61 +61,12 @@ async def send_request(url, work_item: WorkItem, test_command, timeout):
 
     Returns: A `WorkResult`.
     """
-    parameters = {
-        "mutations": [
-            {
-                "module_path": str(mutation.module_path),
-                "operator": mutation.operator_name,
-                "occurrence": mutation.occurrence,
-            }
-            for mutation in work_item.mutations
-        ],
-        "test_command": test_command,
-        "timeout": timeout,
-    }
-    log.info("Sending HTTP request to %s", url)
-    async with aiohttp.request("POST", url, json=parameters) as resp:
-        result = await resp.json()
-        # TODO: Account for possibility that `data` is the wrong shape.
-        return WorkResult(
-            worker_outcome=result["worker_outcome"],
-            output=result["output"],
-            test_outcome=result["test_outcome"],
-            diff=result["diff"],
-        )
+    pass
 
 
 async def handle_mutate_and_test(request):
     """HTTP endpoint handler for requests to mutate-and-test."""
-    args = await request.json()
-    result = mutate_and_test(
-        mutations=[
-            MutationSpec(
-                module_path=Path(mutation["module_path"]),
-                operator_name=mutation["operator"],
-                occurrence=mutation["occurrence"],
-                # TODO: These are not really used, but we have to provide
-                # them because MutationSpec requires them. This is the genesis of the old
-                # distinction between MutationSpec and ResolvedMutationSpec. How should we
-                # really address this?
-                start_pos=(0, 0),
-                end_pos=(0, 1),
-            )
-            for mutation in args["mutations"]
-        ],
-        test_command=args["test_command"],
-        timeout=args["timeout"],
-    )
-    # TODO: Deal with exceptions. There generally won't be any, so we can just return an abnormal result if there it.
-
-    return web.json_response(
-        {
-            "worker_outcome": result.worker_outcome.value,
-            "output": result.output,
-            "test_outcome": result.test_outcome.value if result.test_outcome is not None else None,
-            "diff": result.diff,
-        }
-    )
+    pass
 
 
 def run_worker(port=None, path=None):
@@ -170,8 +78,4 @@ def run_worker(port=None, path=None):
         port: The TCP port on which to listen.
         path: Path to Unix domain socket on which to listen.
     """
-    if port is None and path is None:
-        raise ValueError("Worker requires either a port or domain socket path")
-    app = web.Application()
-    app.add_routes([web.post("/", handle_mutate_and_test)])
-    web.run_app(app, port=port, path=path)
+    pass
